@@ -21,6 +21,14 @@ class Contacts:
               """
             )
             connection.commit()
+            cursor.execute(
+                """
+                CREATE INDEX contacts_email ON contacts(email);
+              """
+            )
+            connection.commit()
+            cursor.close()
+            connection.close()
         self.connection = sqlite3.connect(db_path)
         self.connection.row_factory = sqlite3.Row
 
@@ -28,11 +36,11 @@ class Contacts:
         print("Inserting contacts ...")
         # TODO
         cursor = self.connection.cursor()
-        start = datetime.now()
+        start = datetime.now()     
         cursor.executemany(
             """
             INSERT INTO contacts(name, email)
-            VALUES(?, ?)
+            VALUES (?, ?)
             """,
             contacts,
         )
@@ -40,7 +48,10 @@ class Contacts:
         end = datetime.now()
 
         elapsed = end - start
-        print("insert took", elapsed.microseconds / 1000, "ms")
+        # print time in seconds
+        print("insert took", elapsed.total_seconds() * 1000, "ms")
+        cursor.close()
+
 
     def get_name_for_email(self, email):
         print("Looking for email", email)
@@ -57,13 +68,15 @@ class Contacts:
         end = datetime.now()
 
         elapsed = end - start
-        print("query took", elapsed.microseconds / 1000, "ms")
+        print("query took", elapsed.total_seconds() * 1000, "ms")
         if row:
             name = row["name"]
             print(f"Found name: '{name}'")
+            cursor.close()
             return name
         else:
             print("Not found")
+            cursor.close()
 
 
 def yield_contacts(num_contacts):
@@ -77,7 +90,10 @@ def main():
     contacts = Contacts(db_path)
     contacts.insert_contacts(yield_contacts(num_contacts))
     charlie = contacts.get_name_for_email(f"email-{num_contacts}@domain.tld")
+    contacts.connection.close()
 
 
 if __name__ == "__main__":
     main()
+    # remove file after execution
+    Path("contacts.sqlite3").unlink()
