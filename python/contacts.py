@@ -36,6 +36,11 @@ class Contacts:
             """,
             contacts,
         )
+        self.connection.commit()
+        end = datetime.now()
+
+        elapsed = end - start
+        print("insert took", elapsed.microseconds / 1000, "ms")
 
     def get_name_for_email(self, email):
         print("Looking for email", email)
