@@ -27,6 +27,15 @@ class Contacts:
     def insert_contacts(self, contacts):
         print("Inserting contacts ...")
         # TODO
+        cursor = self.connection.cursor()
+        start = datetime.now()
+        cursor.executemany(
+            """
+            INSERT INTO contacts(name, email)
+            VALUES(?, ?)
+            """,
+            contacts,
+        )
 
     def get_name_for_email(self, email):
         print("Looking for email", email)
@@ -53,11 +62,8 @@ class Contacts:
 
 
 def yield_contacts(num_contacts):
-    # TODO: Generate a lot of contacts
-    # instead of just 3
-    yield ("name-1", "email-1@domain.tld")
-    yield ("name-2", "email-2@domain.tld")
-    yield ("name-3", "email-3@domain.tld")
+    for i in range(num_contacts):
+        yield (f"name-{i+1}", f"email-{i+1}@domain.tld")
 
 
 def main():
